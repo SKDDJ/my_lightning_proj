@@ -1,0 +1,36 @@
+# @package _global_
+
+# runs 1 train, 1 validation and 1 test step
+
+defaults:
+  - default
+
+trainer:
+  # fast_dev_run: true
+  max_epochs: 4
+  accelerator: gpu # debuggers don't like gpus
+  devices: [0, 1, 2, 3] # debuggers don't like multiprocessing
+  detect_anomaly: true # raise exception if NaN or +/-inf is detected in any tensor
+
+# disable callbacks and loggers during debugging
+callbacks: null
+logger: null
+
+extras:
+  ignore_warnings: False
+  enforce_tags: False
+
+# sets level of all command line loggers to 'DEBUG'
+# https://hydra.cc/docs/tutorials/basic/running_your_app/logging/
+hydra:
+  job_logging:
+    root:
+      level: DEBUG
+
+  # use this to also set hydra loggers to 'DEBUG'
+  # verbose: True
+
+data:
+  num_workers: 0 # debuggers don't like multiprocessing
+  batch_size: 4
+  pin_memory: False # disable gpu memory pin

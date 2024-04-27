@@ -1,0 +1,78 @@
+# @package _global_
+
+# to execute this experiment run:
+# python predict.py local=lora_predict
+
+defaults:
+  - override /data: lora
+  - override /model: lora
+  - override /logger: null
+  - override /trainer: default
+
+
+# simply provide checkpoint path to resume training
+ckpt_path: "/root/shiym_proj/DiffLook/epoch_099.ckpt"
+
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["LoRA_Rec_eval"]
+
+seed: 3407
+
+data:
+  predict_dir: ${paths.predict_dir}
+  batch_size: 1
+  num_workers: 0
+
+trainer:
+  fast_dev_run: true
+  devices: [0]
+  # precision: 16
+  num_nodes: 1
+  # hparams_search: lora_optuna
+  # check_val_every_n_epoch: 10
+  # val_check_interval: 0.25
+  # log_every_n_steps: 1
+  # sync_batchnorm: True
+  # gradient_clip_val: 0.5
+  deterministic: False
+
+model:
+  optimizer:
+    _target_: torch.optim.AdamW
+    _partial_: true
+    # lr: 0.1
+    # momentum: 0.9
+    lr: 0.002
+    betas: [0.86, 0.999]
+    # eps: 1e-08 # wd  0.0001
+    weight_decay: 0.000002
+
+  scheduler:
+    _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+    _partial_: true
+    factor: 0.1
+    mode: min
+    patience: 15
+  net:
+    in_dim: 372320
+    input_noise_factor: 0.001
+    latent_noise_factor: 0.1
+    fold_rate: 2
+    kernel_size: 8
+    # enc_channel_list: [1024,512, 512, 256,256]
+    # dec_channel_list: [256, 256, 256, 128, 128]
+    enc_channel_list: [128, 512, 256, 64]
+    dec_channel_list: [64, 256, 512, 128]
+  compile: False
+
+
+
+
+# logger:
+#   wandb:
+#     tags: ${tags}
+#     group: "LoRA_Rec_eval"
+#     name: "tensor*10_lr${model.optimizer.lr}_batch_size${data.batch_size}_optimizer${model.optimizer._target_}_scheduler${model.scheduler._target_}_input_noise${model.net.input_noise_factor}_latent_noise_${model.net.latent_noise_factor}_fold${model.net.fold_rate}_kernel${model.net.kernel_size}_enc${model.net.enc_channel_list}_dec${model.net.dec_channel_list}_${seed}_fp${trainer.precision}"

@@ -1,0 +1,7 @@
+_target_: src.data.lora_datamodule.LoRADataModule
+data_dir: ${paths.data_dir}
+batch_size: 1 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
+train_factor: 0.7
+val_factor: 0.2
+num_workers: 0
+pin_memory: False

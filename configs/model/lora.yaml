@@ -1,0 +1,32 @@
+_target_: src.models.lora_module.LoRALitModule
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  lr: 4e-5
+  weight_decay: 2e-6
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 15
+
+### TODO: here we need to define the input parameters of ae
+net:
+  _target_: src.models.components.autoencoder.medium
+  in_dim: 372320
+  input_noise_factor: 0.001
+  latent_noise_factor: 0.1
+  fold_rate: 8
+  # fold_rate: 5
+  # kernel_size: 5
+  kernel_size: 8
+  # enc_channel_list: [4, 4, 4, 4]
+  # dec_channel_list: [4, 256, 256, 8]
+  enc_channel_list: [8, 8, 8, 8]
+  dec_channel_list: [8, 512, 512, 8]
+
+# compile model for faster training with pytorch 2.0
+compile: true
